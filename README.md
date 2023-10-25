@@ -8,11 +8,7 @@ sounds crazy, but i think its a best way learning about cpu.
 if you write a emulator you have to learn lot about how that cpu actually works.
 
 i think every programmers should wrote their own emulator especially in rust
-<<<<<<< HEAD
 because its fun and pretty good way to explore new language and how computer actually works.
-=======
-because its fun and very good way to explore new language and how computer actually works.
->>>>>>> refs/remotes/origin/main
 ```
 
 ## TOOLS
