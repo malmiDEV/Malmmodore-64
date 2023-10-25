@@ -7,6 +7,7 @@ const LOW: u8 = 1;
 const CHAR: u8 = 2;
 const HIGH: u8 = 4;
 
+#[derive(Clone, Copy)]
 pub struct C64Mem {
    pub ram: [u8; 0x10000],
    rom: [u8; 0x10000],
@@ -45,39 +46,12 @@ impl C64Mem {
 impl IOMem for C64Mem {
    fn read_u8(&self, addr: u16) -> u8 {
       match addr {
-         DATA_DIR => {
-            self.ram[DATA_DIR as usize]
-         }
-         
-         IO => {
-            self.ram[IO as usize]
-         }
-
-         0xA000..=0xBFFF => {
-            if (self.ram[IO as usize] & (1 << 0)) > 0 {
-               self.rom[addr as usize]
-            } else {
-               self.ram[addr as usize]
-            }
-         }
-
-         0xE000..=0xFFFF => {
-            if (self.ram[IO as usize] & (1 << 1)) > 0 {
-               self.rom[addr as usize]
-            } else {
-               self.ram[addr as usize]
-            }
-         }
-
-         0xD000..=0xDFFF => {
-            if (self.ram[IO as usize] & (1 << 2)) > 0 {
-               self.io[addr as usize - 0xD000]
-            } else {
-               self.ram[addr as usize]
-            }
-         }
-
-         _ => self.ram[addr as usize]
+         DATA_DIR        => self.ram[DATA_DIR as usize],
+         IO              => self.ram[IO as usize],
+         0xA000..=0xBFFF => if (self.ram[IO as usize] & (1 << 0)) > 0 { self.rom[addr as usize] } else { self.ram[addr as usize] },
+         0xE000..=0xFFFF => if (self.ram[IO as usize] & (1 << 1)) > 0 { self.rom[addr as usize] } else { self.ram[addr as usize] },
+         0xD000..=0xDFFF => if (self.ram[IO as usize] & (1 << 2)) > 0 { self.io[addr as usize - 0xD000] } else { self.ram[addr as usize] },
+         _               => self.ram[addr as usize]
       }
    }
 
@@ -89,23 +63,42 @@ impl IOMem for C64Mem {
 
    fn write_u8(&mut self, addr: u16, value: u8) {
       match addr {
-         DATA_DIR => {
-            self.ram[DATA_DIR as usize] = value;
-         }
+         DATA_DIR        => self.ram[DATA_DIR as usize] = value,
+         IO              => self.ram[IO as usize] = value,
+         0xD000..=0xDFFF => if (self.ram[IO as usize] & (1 << 2)) > 0 { self.io[addr as usize - 0xD000] = value } else { self.ram[addr as usize] = value },
+         _               => self.ram[addr as usize] = value
+      }
+   }
+}
 
-         IO => {
-            self.ram[IO as usize] = value;
-         }
+impl IOCia for C64Mem {
+   fn read(&self, address: u16) -> u8 {
+      match address {
+         0xDC00..=0xDDFF => self.io[address as usize - 0xD000],
+         _               => panic!("CIA-II READ Out Of Range: {:#X}", address)
+      }
+   }
 
-         0xD000..=0xDFFF => {
-            if (self.ram[IO as usize] & (1 << 2)) > 0 {
-               self.io[addr as usize - 0xD000] = value;
-            } else {
-               self.ram[addr as usize] = value;
-            }
-         }
+   fn write(&mut self, address: u16, value: u8) {
+      match address {
+         0xDC00..=0xDDFF => self.io[address as usize - 0xD000] = value,
+         _               => panic!("CIA-II WRITE Out Of Range: {:#X}", address)
+      }
+   }
+}
 
-         _ => self.ram[addr as usize] = value
+impl IOVic for C64Mem {
+   fn read(&self, addr: u16) -> u8 {
+      match addr {
+         0xD000..=0xD02E => self.io[addr as usize - 0xD000],
+         _               => panic!("VIC REGISTER READ Out Of Range: {:#X}", addr)   
+      }
+   }
+
+   fn write(&mut self, addr: u16, value: u8) {
+      match addr {
+         0xD000..=0xD02E => self.io[addr as usize - 0xD000] = value,
+         _               => panic!("VIC REGISTER WRITE Out Of Range: {:#X}", addr)  
       }
    }
 }

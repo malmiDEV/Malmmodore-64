@@ -24,9 +24,10 @@ pub struct Opcode {
 }
 
 pub fn get_opcode<'a>(code: u8) -> Option<&'a Opcode> {
-   match OPCODE.iter().find(|op| op.code == code) {
-      Some(val) => Some(val),
-      None => None,
+   if let Some(val) = OPCODE.iter().find(|op| op.code == code) {
+      Some(val)
+   } else {
+      None
    }
 }
 

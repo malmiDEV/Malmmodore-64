@@ -1,3 +1,5 @@
+use crate::memory::*;
+
 const SPRITE_LOC_PTR          : u16 = 0xD000;      
 const X_MSBS                  : u16 = 0xD010;
 const Y_SCROLL                : u16 = 0xD011;
@@ -25,19 +27,17 @@ const SPRITE_MULTY_COL1       : u16 = 0xD026;
 const COLOR_SPRITE_PTR        : u16 = 0xD027;         
 
 pub struct Vic {
-   vram: Vec<u8>,
-   palette: [u32; 16]
+   palette: [u32; 16],
 }
 
 impl Vic {
    pub fn new() -> Self {
       Self {
-         vram: vec![0; 0x4000],
-         palette: [0u32; 16]
+         palette: [0u32; 16],
       }
    }
 
-   pub fn init(&mut self) {
+   pub fn init(&mut self, mem: &mut dyn IOVic) {
       let mut n = 0;
       for i in &[
          0x000000,
@@ -60,6 +60,9 @@ impl Vic {
          self.palette[n] = *i;
          n += 1;
       }
+
+      // SET INITIAL REGISTER VALUES
+      mem.write(Y_SCROLL, 0b10011011);
    }
 
    fn get_rgb(&self, index: u8) -> (u8, u8, u8) {
@@ -69,9 +72,26 @@ impl Vic {
             (self.palette[index as usize] >>  8) as u8 & 0xff, 
             (self.palette[index as usize] >>  0) as u8 & 0xff, 
          ),
-         _ => panic!("Color Palette Out-Of-Range: {}", index)
+         _      => panic!("Color Palette Out-Of-Range: {}", index)
       }
    }
 
-   
+   pub fn read_register(&self, mem: &dyn IOVic, address: u16) -> Result<u8, String> {
+      match address {
+         SPRITE_LOC_PTR..=0xD00F => {
+            let index = ((address & 0x000F) >> 1) as u16;
+            if address % 2 == 0 {
+               Ok(mem.read(index))        // x
+            } else {
+               Ok(mem.read(index + 1))    // y
+            }
+         }
+         Y_SCROLL                => {
+            let addr_val = mem.read(address);
+            Ok((addr_val & 0b01111111) | ((mem.read(RASTER_COUNTER) as u16 & 0b100000000) >> 1) as u8)
+         }
+         RASTER_COUNTER          => Ok(mem.read(RASTER_COUNTER)),
+         _                       => return Err(format!("!ERROR READ VIC REGISTER. AT: {:#X}", address))
+      }
+   }
 }

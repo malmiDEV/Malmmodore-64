@@ -53,18 +53,18 @@ impl Cpu {
       
       self.pc += 1;
       let address = self.get_mode(memory, opcode);
-      println!("ADDRMOD: {:?}, ADDR: {:#X}, INSTRUCTION: {}, OP: {:#X} BYTE: {:#X}, PC: {:#X}, A: {:#X}, X: {:#X}, Y: {:#X}, SP:{:#X}", 
-         opcode.mode,
-         address,
-         opcode.mnemonic,
-         opcode.code,
-         opcode.bytes,
-         self.pc - 1,
-         self.a,
-         self.x,
-         self.y,
-         self.sp);
-      self.pc += (opcode.bytes - 1) as u16;
+      // println!("ADDRMOD: {:?}, ADDR: {:#X}, INSTRUCTION: {}, OP: {:#X} BYTE: {:#X}, PC: {:#X}, A: {:#X}, X: {:#X}, Y: {:#X}, SP:{:#X}", 
+      //    opcode.mode,
+      //    address,
+      //    opcode.mnemonic,
+      //    opcode.code,
+      //    opcode.bytes,
+      //    self.pc - 1,
+      //    self.a,
+      //    self.x,
+      //    self.y,
+      //    self.sp);
+      // self.pc += (opcode.bytes - 1) as u16;
       
       match opcode.mnemonic {
          "ADC" => self.adc(memory, address),

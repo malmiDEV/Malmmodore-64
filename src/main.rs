@@ -55,7 +55,7 @@ impl Emu {
         self.cpu.set_sp(0xFF);
 
         let mut vic = Vic::new();
-        vic.init();
+        vic.init(&mut self.mem);
     }
 
     pub fn load_file(&mut self, file_name: &str) -> Vec<u8> {
