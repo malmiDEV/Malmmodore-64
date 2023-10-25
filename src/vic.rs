@@ -68,9 +68,9 @@ impl Vic {
    fn get_rgb(&self, index: u8) -> (u8, u8, u8) {
       match index {
          0..=15 => (
-            (self.palette[index as usize] >> 16) as u8 & 0xff, 
-            (self.palette[index as usize] >>  8) as u8 & 0xff, 
-            (self.palette[index as usize] >>  0) as u8 & 0xff, 
+            (self.palette[index as usize+0] >> 16) as u8 & 0xff, 
+            (self.palette[index as usize+1] >>  8) as u8 & 0xff, 
+            (self.palette[index as usize+2] >>  0) as u8 & 0xff, 
          ),
          _      => panic!("Color Palette Out-Of-Range: {}", index)
       }
