@@ -11,7 +11,6 @@ use std::fs::File;
 use std::io::Read;
 use std::time::Duration;
 
-
 use cpu::*;
 use c64mem::*;
 use memory::*;
@@ -61,7 +60,7 @@ impl Emu {
     pub fn load_file(&mut self, file_name: &str) -> Vec<u8> {
         let mut file = File::open(file_name).unwrap();
         let mut data = Vec::<u8>::new();
-        file.read_to_end(&mut data).expect("File Not Exsist");
+        file.read_to_end(&mut data).expect("File Not Exist");
         data
     }
 }
@@ -81,9 +80,6 @@ fn main() {
     canvas.present();
         
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
-
-    let mut rng = rand::thread_rng();
 
     let mut emu = Emu::new();
     emu.start(0xE000);

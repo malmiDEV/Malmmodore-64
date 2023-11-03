@@ -62,6 +62,7 @@ impl Vic {
       }
 
       // SET INITIAL REGISTER VALUES
+      mem.write(X_SCROLL, 0b00001000);
       mem.write(Y_SCROLL, 0b10011011);
    }
 
@@ -85,13 +86,13 @@ impl Vic {
             } else {
                Ok(mem.read(index + 1))    // y
             }
-         }
+         },
          Y_SCROLL                => {
             let addr_val = mem.read(address);
-            Ok((addr_val & 0b01111111) | ((mem.read(RASTER_COUNTER) as u16 & 0b100000000) >> 1) as u8)
-         }
-         RASTER_COUNTER          => Ok(mem.read(RASTER_COUNTER)),
-         _                       => return Err(format!("!ERROR READ VIC REGISTER. AT: {:#X}", address))
+            Ok((addr_val & 0b01111111) | ((mem.read(address) as u16 & 0b100000000) >> 1) as u8)
+         },
+         RASTER_COUNTER          => Ok(mem.read(address)),
+         _                       => Ok(mem.read(address))
       }
    }
 }
